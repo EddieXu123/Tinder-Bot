@@ -8,6 +8,9 @@ import pyscreenshot as ImageGrab
 from selenium.webdriver.common.keys import Keys
 from pynput.keyboard import Key, Controller
 
+# Global variable to control our keyboard
+keyboard = Controller()
+
 
 def screen_shot():
     # coordinate of message notification gotten by sending dozens of messages to phone
@@ -44,6 +47,10 @@ class TinderBot:
         # Wait for the login screen to popup
         sleep(5)
 
+        # Close Cookies popup on web page
+        close_stalker = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/button')
+        close_stalker.click()
+
         # Tinder changes the welcome page so that the phone log in option is in a different path (1, 2, 3) each time
         # First try to log in by phone in first path:
         try:
@@ -64,7 +71,6 @@ class TinderBot:
             # The second path is the Facebook login, which pops up a second window.
             # To deal with this second window, command+w out of it and select the third option
             if len(self.driver.window_handles) >= 2:  # important in order to reload page b/c you get error page after exiting Facebook popup
-                keyboard = Controller()
                 # switch the Facebook window
                 self.driver.switch_to.window(self.driver.window_handles[1])
 
@@ -123,23 +129,40 @@ class TinderBot:
         not_interested = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div/div/div[3]/button[2]')
         not_interested.click()
 
-        sleep(10)
+        sleep(5)
         # No thanks enable location
         no_thanks_loc = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
         no_thanks_loc.click()
 
-        sleep(1)
-        i_accept = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[3]/div/div/div/button')
-        i_accept.click()
+    @staticmethod
+    def like():
+        keyboard.press(Key.right)
+        keyboard.release(Key.right)
+        sleep(0.5)
 
-        # Keep swiping = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/a')
-        # add tinder to home screen = self.drivier.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
-
+    def auto_swipe(self):
         while True:
-            right = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[1]/div/main/div[1]/div/div/div[1]/div/div[2]/div[4]/button')
-            right.click()
-            sleep(1)
+            sleep(0.5)
+            try:
+                self.like()
+            except NoSuchElementException:
+                try:
+                    self.close_popup()
+                except NoSuchElementException:
+                    self.close_match()
+
+    def close_popup(self):
+        popup = self.driver.find_element_by_xpath(self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]'))
+        popup.close()
+
+    def close_match(self):
+        match_popup = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/a')
+        match_popup.close()
 
 
+# Call the bot
 bot = TinderBot()
 bot.log_on()
+
+
+
