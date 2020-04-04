@@ -5,7 +5,6 @@ from secrets import phone_num
 import pytesseract
 from PIL import Image
 import pyscreenshot as ImageGrab
-from selenium.webdriver.common.keys import Keys
 from pynput.keyboard import Key, Controller
 
 # Global variable to control our keyboard
@@ -115,7 +114,7 @@ class TinderBot:
         self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/div[3]/input[1]').send_keys(screen_shot())
         sleep(1)
         # Press the continue login button after entering the Tinder 6-digit code
-        enter = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
+        enter = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
         enter.click()
 
         """When you log in, a bunch of stuff pops up, such as location enabling, premium member upgrades, etc."""
@@ -138,31 +137,22 @@ class TinderBot:
     def like():
         keyboard.press(Key.right)
         keyboard.release(Key.right)
-        sleep(0.5)
 
     def auto_swipe(self):
         while True:
             sleep(0.5)
             try:
-                self.like()
+                self.close_match()
             except NoSuchElementException:
-                try:
-                    self.close_popup()
-                except NoSuchElementException:
-                    self.close_match()
-
-    def close_popup(self):
-        popup = self.driver.find_element_by_xpath(self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]'))
-        popup.close()
+                self.like()
 
     def close_match(self):
-        match_popup = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/a')
-        match_popup.close()
+        self.driver.find_element_by_xpath('//*[@id="chat-text-area"]').send_keys("Heyyy :)")
+        send_message = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/div[3]/form/button')
+        send_message.click()
 
 
 # Call the bot
 bot = TinderBot()
 bot.log_on()
-
-
-
+bot.auto_swipe()
