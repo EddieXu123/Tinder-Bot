@@ -36,6 +36,8 @@ def screen_shot():
 
 
 class TinderBot:
+    right = 0
+
     def __init__(self):
         self.driver = webdriver.Chrome()
 
@@ -47,7 +49,7 @@ class TinderBot:
         sleep(5)
 
         # Close Cookies popup on web page
-        close_stalker = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/button')
+        close_stalker = self.driver.find_element_by_xpath('//*[@id="content"]/div/div[2]/div/div/div[1]/button')
         close_stalker.click()
 
         # Tinder changes the welcome page so that the phone log in option is in a different path (1, 2, 3) each time
@@ -103,18 +105,17 @@ class TinderBot:
 
         sleep(1)
         # Now, we have the phone number screen up and we can enter our phone number
-        self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/div[2]/div/input').send_keys(phone_num)
-        login = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
+        self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/div[2]/div/input').send_keys(phone_num)
+        login = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/button')
         login.click()
-
         # My computer takes 6 seconds for the Tinder message notification to pop up in the top right screen
         sleep(6)
         # This line calls the screen_shot() method above, which takes a screen shot of the top right corner of the screen
         # With tesseract-OCR and returns the code that Tinder sends you. It then enters that code into the login popup
-        self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/div[3]/input[1]').send_keys(screen_shot())
+        self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/div[3]/input[1]').send_keys(screen_shot())
         sleep(1)
         # Press the continue login button after entering the Tinder 6-digit code
-        enter = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
+        enter = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/button')
         enter.click()
 
         """When you log in, a bunch of stuff pops up, such as location enabling, premium member upgrades, etc."""
@@ -133,26 +134,57 @@ class TinderBot:
         no_thanks_loc = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
         no_thanks_loc.click()
 
-    @staticmethod
-    def like():
+    def like(self):
         keyboard.press(Key.right)
         keyboard.release(Key.right)
 
+    # Finite State machine to auto-swipe
     def auto_swipe(self):
         while True:
             sleep(0.5)
             try:
-                self.close_match()
+                self.close_popup()
             except NoSuchElementException:
-                self.like()
+                try:
+                    self.close_match()
+                except NoSuchElementException:
+                    self.like()
 
+    # If I get a match, Message match "heyyy :)" and close popup.
     def close_match(self):
-        self.driver.find_element_by_xpath('//*[@id="chat-text-area"]').send_keys("Heyyy :)")
+        self.driver.find_element_by_xpath('//*[@id="chat-text-area"]').send_keys("Heyy :)")
         send_message = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/div[3]/form/button')
         send_message.click()
 
+    # Close popup that says "Add Tinder to your home screen"
+    def close_popup(self):
+        close_pop = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
+        close_pop.click()
 
+    def message(self):
+        message_tab = self.driver.find_element_by_xpath('//*[@id="messages-tab"]')
+        message_tab.click()
+        matches = self.driver.find_elements_by_class_name('messageListItem')
+        for i in range(0, len(matches) - 1):
+            current = matches[i].get_attribute('innerHTML')
+            if not 'svg' in current:
+                matches[i].click()
+                break
+        self.actually_message()
+
+
+    #def actually_message(self):
+
+
+        # need to be able to see if someone replies (look at red dot)
+        # if the message doesn't have the reply symbol, it means they
+        # do not have the svg subclass
+        # are the ones who messaged me: //*[@id="matchListWithMessages"]/div[2]/a[5]/div[2]/div[2]/svg
+        # it has an svg at the end, maybe this is it?
+#//*[@id="matchListWithMessages"]/div[2]
+#'matchListItem'
 # Call the bot
 bot = TinderBot()
 bot.log_on()
 bot.auto_swipe()
+
