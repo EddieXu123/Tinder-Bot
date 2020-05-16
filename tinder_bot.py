@@ -129,11 +129,6 @@ class TinderBot:
         not_interested = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div/div/div[3]/button[2]')
         not_interested.click()
 
-        sleep(5)
-        # No thanks enable location
-        no_thanks_loc = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button')
-        no_thanks_loc.click()
-
     def like(self):
         keyboard.press(Key.right)
         keyboard.release(Key.right)
@@ -143,12 +138,16 @@ class TinderBot:
         while True:
             sleep(0.5)
             try:
-                self.close_popup()
+                self.out_of_likes()
+                break
             except NoSuchElementException:
                 try:
-                    self.close_match()
+                    self.close_popup()
                 except NoSuchElementException:
-                    self.like()
+                    try:
+                        self.close_match()
+                    except NoSuchElementException:
+                        self.like()
 
     # If I get a match, Message match "heyyy :)" and close popup.
     def close_match(self):
@@ -161,6 +160,10 @@ class TinderBot:
         close_pop = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
         close_pop.click()
 
+    def out_of_likes(self):
+        close = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[3]/button[2]')
+        close.click()
+
     def message(self):
         message_tab = self.driver.find_element_by_xpath('//*[@id="messages-tab"]')
         message_tab.click()
@@ -170,17 +173,12 @@ class TinderBot:
             if not 'svg' in current:
                 matches[i].click()
                 break
-        self.actually_message()
+        #self.actually_message()
+
 
 
     #def actually_message(self):
 
-
-        # need to be able to see if someone replies (look at red dot)
-        # if the message doesn't have the reply symbol, it means they
-        # do not have the svg subclass
-        # are the ones who messaged me: //*[@id="matchListWithMessages"]/div[2]/a[5]/div[2]/div[2]/svg
-        # it has an svg at the end, maybe this is it?
 #//*[@id="matchListWithMessages"]/div[2]
 #'matchListItem'
 # Call the bot
