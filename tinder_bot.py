@@ -12,6 +12,7 @@ keyboard = Controller()
 
 
 # Method to screen shot the 6-digit SMS code Tinder sends to verify the user
+# Sorry if this function is misplaced I'm not sure where it's supposed to go
 def screen_shot():
     # Desktop coordinate of the iMessage you receive from Tinder
     image = ImageGrab.grab(bbox=(2240, 140, 2565, 210))
