@@ -12,22 +12,18 @@ keyboard = Controller()
 
 
 def screen_shot():
-    # coordinate of message notification gotten by sending dozens of messages to phone
-    # and then using a notepad to mark where the key is on my screen. Then, trial and error to
-    # pinpoint where the code is on my screen to extract to text using OCR
+    # Desktop coordinate of the iMessage you receive from Tinder
     image = ImageGrab.grab(bbox=(2240, 140, 2565, 210))
     image.save('code4.png')
 
-    # Using our OCR
+    # Using our OCR, record the 6-digit auth code sent to you
     im = Image.open('code4.png')
     text = pytesseract.image_to_string(im, lang="eng")
-    print(text)
-
     write_file = open("output1.txt", "w")
     write_file.write(text)
     write_file.close()
 
-    # Extracting the code from the screen shot
+    # Extracting the code from the screen shot, used later when signing into Tinder via phone
     screen = open("output1.txt", "r")
     output = screen.readline()
     output2 = output.split()
@@ -38,6 +34,7 @@ def screen_shot():
 class TinderBot:
     right = 0
 
+    # Create the browser we will use
     def __init__(self):
         self.driver = webdriver.Chrome()
 
@@ -69,7 +66,7 @@ class TinderBot:
             sleep(3)
 
             # If first path isn't the phone number and the second path isn't the phone number,
-            # The second path is the Facebook login, which pops up a second window.
+            # we know the second path is the Facebook login, which pops up a second window.
             # To deal with this second window, command+w out of it and select the third option
             if len(self.driver.window_handles) >= 2:  # important in order to reload page b/c you get error page after exiting Facebook popup
                 # switch the Facebook window
@@ -106,6 +103,7 @@ class TinderBot:
         sleep(1)
         # Now, we have the phone number screen up and we can enter our phone number
         self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/div[2]/div/input').send_keys(phone_num)
+        # Click log in
         login = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[1]/button')
         login.click()
         # My computer takes 6 seconds for the Tinder message notification to pop up in the top right screen
@@ -129,6 +127,7 @@ class TinderBot:
         not_interested = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div/div/div[3]/button[2]')
         not_interested.click()
 
+    # Method to swipe right on a person, by simply pressing the 'right' arrow key
     def like(self):
         keyboard.press(Key.right)
         keyboard.release(Key.right)
@@ -137,15 +136,22 @@ class TinderBot:
     def auto_swipe(self):
         while True:
             sleep(0.5)
+            # First, we test the end condition, which is when we run out of likes
             try:
                 self.out_of_likes()
                 break
+            # If that doesn't work
             except NoSuchElementException:
                 try:
+                    # We can try closing any pop-up windows that may appear
                     self.close_popup()
+                # If there are no pop-up windows
                 except NoSuchElementException:
                     try:
+                        # Try closing any match windows
                         self.close_match()
+                    # If there aren't any match windows, then we know we are on our default person profile
+                    # and can continue swiping right
                     except NoSuchElementException:
                         self.like()
 
@@ -160,28 +166,36 @@ class TinderBot:
         close_pop = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[2]/button[2]')
         close_pop.click()
 
+    # If I am out of likes, a window will pop up. Simply close that window and go to message the matches
     def out_of_likes(self):
         close = self.driver.find_element_by_xpath('//*[@id="modal-manager"]/div/div/div[3]/button[2]')
         close.click()
+        self.message()
 
+    # After I run out of swipes (100 total), I can start messaging those matches who replied to the initial "heyyy"
     def message(self):
+        # Go to the messages tab
         message_tab = self.driver.find_element_by_xpath('//*[@id="messages-tab"]')
         message_tab.click()
+        # The messages are organized in a 'group', in which I can access each element
         matches = self.driver.find_elements_by_class_name('messageListItem')
+        # For every message in the group
         for i in range(0, len(matches) - 1):
+            # I need to first see if they replied to me, otherwise I am just spamming them
+            # The get_attribute function gets the entire innerHTML code of a match. I found out
+            # that if the innerHTML does not have "svg" in it, the other person messaged me back
             current = matches[i].get_attribute('innerHTML')
+            # If the current match I am on messaged me back
             if not 'svg' in current:
+                # Select that person and initiate conversation
                 matches[i].click()
+                # self.actually_message()
                 break
-        #self.actually_message()
+
+    # def actually_message(self): I will write this later when I decide how to initiate conversation
 
 
-
-    #def actually_message(self):
-
-#//*[@id="matchListWithMessages"]/div[2]
-#'matchListItem'
-# Call the bot
+# Calling the functions to run the bot
 bot = TinderBot()
 bot.log_on()
 bot.auto_swipe()
