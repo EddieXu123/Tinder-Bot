@@ -7,11 +7,11 @@ def screen_shot():
     # coordinate of message notification gotten by sending dozens of messages to phone
     # and then using a notepad to mark where the key is on my screen. Then, trial and error to
     # pinpoint where the code is on my screen to extract to text using OCR
-    image = ImageGrab.grab(bbox=(2240, 140, 2565, 210))
-    image.save('code4.png')
+    image = ImageGrab.grab(bbox=(1123, 70, 1280, 90))
+    image.save('code5.png')
 
     # Using our OCR
-    im = Image.open('code4.png')
+    im = Image.open('code5.png')
     text = pytesseract.image_to_string(im, lang="eng")
     print(text)
 

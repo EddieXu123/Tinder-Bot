@@ -1,4 +1,5 @@
 from selenium import webdriver
+import webdriver_manager.chrome
 from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 from secrets import phone_num
@@ -6,6 +7,7 @@ import pytesseract
 from PIL import Image
 import pyscreenshot as ImageGrab
 from pynput.keyboard import Key, Controller
+# pip3 install webdriver-manager  <-- Use this if your chromedriver is out of date
 
 # Global variable to control our keyboard
 keyboard = Controller()
@@ -15,9 +17,8 @@ keyboard = Controller()
 # Sorry if this function is misplaced I'm not sure where it's supposed to go
 def screen_shot():
     # Desktop coordinate of the iMessage you receive from Tinder
-    image = ImageGrab.grab(bbox=(2240, 140, 2565, 210))
+    image = ImageGrab.grab(bbox=(1123, 70, 1280, 90))
     image.save('code4.png')
-
     # Using our OCR, record the 6-digit auth code sent to you
     im = Image.open('code4.png')
     text = pytesseract.image_to_string(im, lang="eng")
@@ -38,7 +39,7 @@ class TinderBot:
 
     # Create the browser we will use
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        self.driver = webdriver.Chrome(webdriver_manager.chrome.ChromeDriverManager().install())
 
     def log_on(self):
         # Log onto Tinder
@@ -157,9 +158,10 @@ class TinderBot:
                     except NoSuchElementException:
                         self.like()
 
-    # If I get a match, Message match "heyyy :)" and close popup.
+    # If I get a match, Message match a compliment and close popup.
     def close_match(self):
-        self.driver.find_element_by_xpath('//*[@id="chat-text-area"]').send_keys("Heyy :)")
+        self.driver.find_element_by_xpath('//*[@id="chat-text-area"]').send_keys(
+            "Hi! I'm not really looking for a relationship but I just wanted to let you know that you are gorgeous and amazing! Stay awesome!")
         send_message = self.driver.find_element_by_xpath('//*[@id="modal-manager-canvas"]/div/div/div[1]/div/div[3]/div[3]/form/button')
         send_message.click()
 
@@ -174,7 +176,7 @@ class TinderBot:
         close.click()
         self.message()
 
-    # After I run out of swipes (100 total), I can start messaging those matches who replied to the initial "heyyy"
+    # After I run out of swipes (100 total), I can start messaging those matches who replied to the initial compliment
     def message(self):
         # Go to the messages tab
         message_tab = self.driver.find_element_by_xpath('//*[@id="messages-tab"]')
