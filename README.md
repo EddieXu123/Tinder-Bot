@@ -1,7 +1,5 @@
 # TinderBot
-The first of my 10 Bots in 10 days journey, inspired by Jennifer Dewalt's 180 websites in 180 days: https://jenniferdewalt.com/. 
-
-This was also the first bot I ever made, so I consulted Aaron Jack's TinderBot video on YouTube, which helped a lot: https://www.youtube.com/watch?v=6u0OZqrtYac. I also really liked the idea of using Selenium and Chromedriver.
+The first of my 5 Bots in 5 days journey, inspired by Jennifer Dewalt's 180 websites in 180 days: https://jenniferdewalt.com/. 
 
 \
 \
